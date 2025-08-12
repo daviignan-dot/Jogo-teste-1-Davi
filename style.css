@@ -33,6 +33,7 @@ body {
     height: 50px;
     background-color: #2E8B57;
     border-radius: 10px;
+    transition: bottom 0.1s ease-out; /* Para suavizar a queda */
 }
 
 /* Obstáculo */
