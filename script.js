@@ -4,24 +4,28 @@ const obstacle = document.getElementById('obstacle');
 
 // Variáveis de controle
 let isJumping = false;
-let gravity = 1;
-let gameInterval;
+let jumpHeight = 0;
+let gravity = 3;
+let jumpPower = 20;
 let isGameOver = false;
+let obstacleSpeed = 2;
 
 // Função para fazer o dinossauro pular
 function jump() {
-    if (isJumping) return; // Impede que o dinossauro pule enquanto já estiver no ar
+    if (isJumping || isGameOver) return; // Impede que o dinossauro pule enquanto já estiver no ar
     isJumping = true;
 
-    let jumpHeight = 0;
-    const jumpUp = setInterval(() => {
-        if (jumpHeight >= 100) {
-            clearInterval(jumpUp);
-            // Começa a cair
-            const fallDown = setInterval(() => {
+    // Fase de subida
+    let jumpUpInterval = setInterval(() => {
+        if (jumpHeight >= jumpPower) {
+            clearInterval(jumpUpInterval);
+
+            // Fase de queda
+            let fallDownInterval = setInterval(() => {
                 if (jumpHeight <= 0) {
-                    clearInterval(fallDown);
+                    clearInterval(fallDownInterval);
                     isJumping = false;
+                    jumpHeight = 0;
                 }
                 jumpHeight -= gravity;
                 dino.style.bottom = jumpHeight + 'px';
@@ -37,12 +41,14 @@ function moveObstacle() {
     if (isGameOver) return;
 
     const obstaclePosition = obstacle.getBoundingClientRect();
+    const dinoPosition = dino.getBoundingClientRect();
 
     // Colisão com o dinossauro
     if (
-        obstaclePosition.left < dino.getBoundingClientRect().right &&
-        obstaclePosition.top < dino.getBoundingClientRect().bottom &&
-        obstaclePosition.bottom > dino.getBoundingClientRect().top
+        obstaclePosition.left < dinoPosition.right &&
+        obstaclePosition.right > dinoPosition.left &&
+        obstaclePosition.top < dinoPosition.bottom &&
+        obstaclePosition.bottom > dinoPosition.top
     ) {
         alert('Game Over!');
         isGameOver = true;
@@ -50,14 +56,16 @@ function moveObstacle() {
     }
 
     // Reseta a posição do obstáculo quando ele sair da tela
-    if (obstaclePosition.left <= -30) {
+    if (obstaclePosition.right <= 0) {
         obstacle.style.right = '-50px';
     }
 }
 
-// Iniciar o jogo
+// Iniciar o movimento do obstáculo e o jogo
 function startGame() {
-    gameInterval = setInterval(moveObstacle, 10);
+    gameInterval = setInterval(() => {
+        moveObstacle();
+    }, 10);
 }
 
 // Detecta o pressionamento da tecla de pulo
